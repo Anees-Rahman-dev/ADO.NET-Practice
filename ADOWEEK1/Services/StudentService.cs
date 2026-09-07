@@ -193,23 +193,49 @@ namespace ADOWEEK1.Services
         }
 
 
-        //public DataSet InsertingValueToATable()
-        //{
+        public DataTable CreatingTableAndInsertValues()
+        {
+            DataTable table = new DataTable();
 
-        //    DataSet InsertedDataSet = new DataSet();
+            table.Columns.Add("Id",typeof(int));
+            table.Columns.Add("Name",typeof(string));
+            table.Columns.Add("Age",typeof(int));
 
-        //    using SqlConnection connection = new SqlConnection(_ConnectionString);
+            var FirstMan = table.Rows.Add(1, "Sai", 26);
+            var SeconMan = table.Rows.Add(2, "Anirudh",29);
 
-        //    DataTable table = new DataTable(); //we can also insert to an Existing table
-        //    // DataTable table = new DataTable("Students");  reaseach it okey..? whether you can insert to an existing table or not
+            using SqlConnection connection = new SqlConnection(_ConnectionString);
 
-        //    table.Columns.Add("Id",typeof(int));
-        //    table.Columns.Add("Name",typeof(string));
-        //    table.Columns.Add("Age",typeof(int));
+            string query = @"CREATE TABLE NewStudents
+                                (Id INT PRIMARY KEY,
+                                 Name VARCHAR(100),
+                                 Age INT)";
+            using SqlCommand command = new SqlCommand(query, connection);
 
-        //    table.Rows.Add(1,"Sulaiman",25);
-        //    table.Rows.Add();
-        //}
+            command.ExecuteNonQuery();
+
+            string insertQuery = @"INSERT INTO NewStudents (Id, Name, Age)VALUES(@Id,@Name,@Age) "
+
+            using SqlCommand InsertCommand = new SqlCommand(insertQuery,connection);
+
+            InsertCommand.Parameters.Add("Id",SqlDbType.Int);
+            InsertCommand.Parameters.Add("Name",SqlDbType.VarChar,100);
+            InsertCommand.Parameters.Add("Age",SqlDbType.Int);
+
+
+            InsertCommand.Parameters["@Id"].Value = FirstMan["Id"];
+            InsertCommand.Parameters["@Name"].Value = FirstMan["Name"];
+            InsertCommand.Parameters["@Age"].Value = FirstMan["Age"];
+
+            InsertCommand.Parameters["@Id"].Value = SeconMan["Id"];
+            InsertCommand.Parameters["@Name"].Value = SeconMan["Name"];
+            InsertCommand.Parameters["Age"].Value = SeconMan["Age"];
+
+            InsertCommand.ExecuteNonQuery();
+
+            return table;
+
+        }
 
         //public List<Student> StoredProcedureMe()
         //{
