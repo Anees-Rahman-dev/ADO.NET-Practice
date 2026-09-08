@@ -16,6 +16,8 @@ namespace ADOWEEK1.Services
 
         DataTable FilteredStudents();
 
-        //DataSet InsertingValueToATable();
+        DataTable CreatingTableAndInsertValues();
+
+        Student? GetStudentByIdUsingSp(int id);
     }
 }

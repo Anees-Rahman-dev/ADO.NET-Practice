@@ -206,7 +206,12 @@ namespace ADOWEEK1.Services
 
             using SqlConnection connection = new SqlConnection(_ConnectionString);
 
-            string query = @"CREATE TABLE NewStudents
+            connection.Open();
+
+            string query = @"IF OBJECT_ID('NewStudents','U') IS NOT NULL
+                             DROP TABLE NewStudents;
+
+                                CREATE TABLE NewStudents
                                 (Id INT PRIMARY KEY,
                                  Name VARCHAR(100),
                                  Age INT)";
@@ -214,22 +219,33 @@ namespace ADOWEEK1.Services
 
             command.ExecuteNonQuery();
 
-            string insertQuery = @"INSERT INTO NewStudents (Id, Name, Age)VALUES(@Id,@Name,@Age) "
+            string insertQuery = @"INSERT INTO NewStudents (Id, Name, Age)VALUES(@Id,@Name,@Age)";
 
             using SqlCommand InsertCommand = new SqlCommand(insertQuery,connection);
 
-            InsertCommand.Parameters.Add("Id",SqlDbType.Int);
-            InsertCommand.Parameters.Add("Name",SqlDbType.VarChar,100);
-            InsertCommand.Parameters.Add("Age",SqlDbType.Int);
+            InsertCommand.Parameters.Add("@Id",SqlDbType.Int);
+            InsertCommand.Parameters.Add("@Name",SqlDbType.VarChar,100);
+            InsertCommand.Parameters.Add("@Age",SqlDbType.Int);
 
+            //InsertCommand.Parameters["@Id"].Value = FirstMan["Id"];
+            //InsertCommand.Parameters["@Name"].Value = FirstMan["Name"];
+            //InsertCommand.Parameters["@Age"].Value = FirstMan["Age"];
 
-            InsertCommand.Parameters["@Id"].Value = FirstMan["Id"];
-            InsertCommand.Parameters["@Name"].Value = FirstMan["Name"];
-            InsertCommand.Parameters["@Age"].Value = FirstMan["Age"];
+            //InsertCommand.Parameters["@Id"].Value = SeconMan["Id"];
+            //InsertCommand.Parameters["@Name"].Value = SeconMan["Name"];
+            //InsertCommand.Parameters["@Age"].Value = SeconMan["Age"];
 
-            InsertCommand.Parameters["@Id"].Value = SeconMan["Id"];
-            InsertCommand.Parameters["@Name"].Value = SeconMan["Name"];
-            InsertCommand.Parameters["Age"].Value = SeconMan["Age"];
+            foreach (DataRow row in table.Rows)
+            {
+                InsertCommand.Parameters["@Id"].Value = row["Id"];
+                InsertCommand.Parameters["@Name"].Value = row["Name"];
+                InsertCommand.Parameters["@Age"].Value = row["Age"];
+
+                InsertCommand.ExecuteNonQuery();
+            }
+
+            return table;
+
 
             InsertCommand.ExecuteNonQuery();
 
@@ -237,14 +253,35 @@ namespace ADOWEEK1.Services
 
         }
 
-        //public List<Student> StoredProcedureMe()
-        //{
-        //    using SqlConnection connection = new SqlConnection(_ConnectionString);
+     public Student? GetStudentByIdUsingSp(int id)
+        {
+            using SqlConnection connection = new SqlConnection(_ConnectionString);
 
-        //    string query = "sd";
+            connection.Open();
 
-        //    using SqlCommand command = new SqlCommand(connection);
-        //}
+            using SqlCommand command = new SqlCommand("GetStudentById", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+
+            command.Parameters.AddWithValue("@Ids", id);
+
+            using SqlDataReader reader = command.ExecuteReader();
+
+            if (reader.Read())
+            {
+
+                Student student = new Student
+                {
+                    Name = reader["Name"].ToString()!,
+                    Age = Convert.ToInt32(reader["Age"])
+                };
+                return student;
+            }
+
+            return null;
+
+
+        }
 
     }
 }

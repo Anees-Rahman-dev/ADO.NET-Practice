@@ -93,11 +93,31 @@ namespace ADOWEEK1.Controllers
      
         }
 
-        //[HttpPost]
+        [HttpPost("CTIV")]
 
-        //public List<Student> InsertingValueToATable()
-        //{
-                   
-        //}
+        public List<Student> CreatingTableAndInsertValues()
+        {
+            DataTable CTIV = _studentService.CreatingTableAndInsertValues();
+
+            List<Student> students = new List<Student>();
+
+            foreach (DataRow row in CTIV.Rows)
+            {
+                students.Add(new Student
+                {
+                    Id = Convert.ToInt32(row["id"]),
+                    Name = row["Name"].ToString()!,
+                    Age = Convert.ToInt32(row["Age"])
+                });
+            }
+            return students;
+        }
+
+        [HttpGet("UsingSp")]
+
+        public Student? GetStudentByIdUsingSp(int id)
+        {
+            return _studentService.GetStudentByIdUsingSp(id);
+        }
     }
 }
